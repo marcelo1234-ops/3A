@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudo Orientado: Metonímia ou Pleonasmo?</title>
+    <style>
+        *{margin:0; padding:0; font-family: 'Segoe UI', Arial; box-sizing:border-box;}
+        body{background:#eef2f7; color:#2d3748; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;}
+        .caixa{background:#fff; padding:30px; border-radius:16px; width:100%; max-width:520px; box-shadow:0 8px 30px rgba(0,0,0,0.12);}
+        h1{text-align:center; margin-bottom:8px; color:#2b6cb0; font-size:22px;}
+        .subtitulo{text-align:center; color:#718096; font-size:14px; margin-bottom:20px;}
+        .placar{display:flex; justify-content:space-around; margin-bottom:15px; font-size:17px; font-weight:bold; padding:10px; background:#f7fafc; border-radius:10px;}
+        .progresso{text-align:center; margin-bottom:15px; font-size:15px; color:#4a5568;}
+        .frase{background:#edf2f7; padding:25px 20px; border-radius:12px; margin-bottom:25px; text-align:center; font-size:19px; font-weight:500; line-height:1.5; min-height:90px; display:flex; align-items:center; justify-content:center;}
+        .opcoes{display:flex; gap:15px; margin-bottom:20px;}
+        .btn{flex:1; padding:16px; border:none; border-radius:10px; font-size:17px; font-weight:bold; cursor:pointer; transition:0.2s;}
+        .btn-metonimia{background:#ed8936; color:white;}
+        .btn-pleonasmo{background:#38a169; color:white;}
+        .btn:hover{transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+        .btn:disabled{opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none;}
+        .btn-proxima{width:100%; margin-top:8px; padding:14px; background:#2b6cb0; color:white; font-size:16px; border-radius:10px;}
+        .btn-proxima:hover{background:#2c5282;}
+        .resultado{text-align:center; margin:12px 0; font-size:18px; font-weight:bold; min-height:30px;}
+        .explicacao{margin-top:10px; padding:14px; border-radius:10px; display:none; text-align:center; line-height:1.6; font-size:15px;}
+        .correta{background:#f0fff4; border:2px solid #9ae6b4; color:#22543d;}
+        .errada{background:#fff5f5; border:2px solid #feb2b2; color:#742a2a;}
+        .tela-final{display:none; text-align:center; padding:20px;}
+        .tela-final h2{color:#2b6cb0; margin-bottom:15px; font-size:24px;}
+        .tela-final .item{font-size:18px; margin:10px 0; padding:12px; background:#f7fafc; border-radius:8px;}
+        .carinha{margin-top:20px; font-size:60px; padding:15px; border-radius:12px;}
+        .excelente{background:#f0fff4; border:2px solid #9ae6b4;}
+        .bom{background:#fef5e7; border:2px solid #fbd38d;}
+        .regular{background:#fef3e2; border:2px solid #fcb68f;}
+        .estudar{background:#fff5f5; border:2px solid #feb2b2;}
+        .rodape{text-align:center; margin-top:20px; font-size:13px; color:#a0aec0; line-height:1.5;}
+    </style>
+</head>
+<body>
+    <div class="caixa" id="tela-jogo">
+        <h1>Figuras de Linguagem</h1>
+        <p class="subtitulo">Identifique: Metonímia ou Pleonasmo</p>
+        
+        <div class="progresso">Questão <span id="atual">1</span> de <span id="total">16</span></div>
+        
+        <div class="placar">
+            <span>✅ Acertos: <span id="acertos">0</span></span>
+            <span>❌ Erros: <span id="erros">0</span></span>
+        </div>
+
+        <div class="frase" id="frase"></div>
+        
+        <div class="opcoes">
+            <button class="btn btn-metonimia" id="btn-met" onclick="responder('metonimia')">METONÍMIA</button>
+            <button class="btn btn-pleonasmo" id="btn-pleo" onclick="responder('pleonasmo')">PLEONASMO</button>
+        </div>
+        
+        <div class="resultado" id="resultado"></div>
+        <div class="explicacao" id="explicacao"></div>
+        
+        <button class="btn btn-proxima" id="btn-proxima" onclick="novaRodada()" style="display:none;">Próxima Questão →</button>
+    </div>
+
+    <div class="caixa tela-final" id="tela-final">
+        <h2>🏆 Resultado Final</h2>
+        <div class="item">⏱️ Tempo total: <span id="tempo-final"></span></div>
+        <div class="item">✅ Acertos: <span id="acertos-final"></span> / 16</div>
+        <div class="item">❌ Erros: <span id="erros-final"></span> / 16</div>
+        <div class="item">📈 Aproveitamento: <span id="porcentagem"></span>%</div>
+        <div class="carinha" id="carinha"></div>
+    </div>
+    
+    <p class="rodape">Estudo Orientado — Escola Lili Feitosa<br>3º Ano A</p>
+
+<script>
+const perguntas = [
+    // METONÍMIA
+    {texto: "Bebeu uma taça de vinho.", resposta: "metonimia", explicação: "📌 Metonímia: usa o recipiente (taça) para representar o conteúdo (vinho)."},
+    {texto: "Leio Machado de Assis todos os dias.", resposta: "metonimia", explicação: "📌 Metonímia: usa o nome do autor para representar suas obras."},
+    {texto: "O salário mal dá para comer.", resposta: "metonimia", explicação: "📌 Metonímia: usa o alimento para representar o sustento."},
+    {texto: "Gosto de ler os clássicos da literatura.", resposta: "metonimia", explicação: "📌 Metonímia: usa uma característica para representar as obras."},
+    {texto: "A cidade inteira foi às ruas.", resposta: "metonimia", explicação: "📌 Metonímia: usa o lugar para representar as pessoas que nele vivem."},
+    {texto: "Ele é um bom coração.", resposta: "metonimia", explicação: "📌 Metonímia: usa uma parte do corpo para representar o sentimento/a pessoa."},
+    {texto: "Comprei um novo quadro de Picasso.", resposta: "metonimia", explicação: "📌 Metonímia: usa o nome do artista para representar sua obra."},
+    {texto: "O estádio aplaudiu de pé.", resposta: "metonimia", explicação: "📌 Metonímia: usa o local para representar o público presente."},
+    // PLEONASMO
+    {texto: "Subiu para cima do telhado.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: 'Subir' já significa ir para cima — repetição desnecessária."},
+    {texto: "Entrou para dentro de casa.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: 'Entrar' já significa ir para dentro — ideia repetida."},
+    {texto: "O sol lá fora está muito quente.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: o sol já está fora por natureza — redundância."},
+    {texto: "Olhar os olhos dela bem de perto.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: repetição da ideia de ver/observar."},
+    {texto: "Vi com meus próprios olhos.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: ver é sempre com os olhos — redundância."},
+    {texto: "A chuva caiu do céu.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: chuva já cai do céu — informação óbvia."},
+    {texto: "Andei a pé pela cidade.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: andar geralmente é a pé — redundância."},
+    {texto: "Encontramo-nos juntos na escola.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: 'Encontrar-se' já implica estar junto."}
+];
+
+let acertos = 0, erros = 0, perguntaAtual;
+let filaAleatoria = [];
+let indiceAtual = 0;
+let inicioTempo = Date.now();
+
+function embaralharPerguntas(){
+    filaAleatoria = [...perguntas];
+    for(let i = filaAleatoria.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [filaAleatoria[i], filaAleatoria[j]] = [filaAleatoria[j], filaAleatoria[i]];
+    }
+    indiceAtual = 0;
+}
+
+function novaRodada(){
+    document.getElementById('resultado').textContent = "";
+    document.getElementById('explicacao').style.display = "none";
+    document.getElementById('btn-proxima').style.display = "none";
+    document.getElementById('btn-met').disabled = false;
+    document.getElementById('btn-pleo').disabled = false;
+
+    if(indiceAtual >= filaAleatoria.length){
+        mostrarResultadoFinal();
+        return;
+    }
+
+    perguntaAtual = filaAleatoria[indiceAtual];
+    indiceAtual++;
+    document.getElementById('atual').textContent = indiceAtual;
+    document.getElementById('frase').textContent = perguntaAtual.texto;
+}
+
+function responder(respostaEscolhida){
+    document.getElementById('btn-met').disabled = true;
+    document.getElementById('btn-pleo').disabled = true;
+
+    const res = document.getElementById('resultado');
+    const exp = document.getElementById('explicacao');
+    
+    if(respostaEscolhida === perguntaAtual.resposta){
+        acertos++;
+        res.textContent = "✅ RESPOSTA CORRETA!";
+        exp.className = "explicacao correta";
+    }else{
+        erros++;
+        res.textContent = "❌ RESPOSTA ERRADA! Veja abaixo:";
+        exp.className = "explicacao errada";
+    }
+
+    exp.textContent = perguntaAtual.explicação;
+    exp.style.display = "block";
+    document.getElementById('acertos').textContent = acertos;
+    document.getElementById('erros').textContent = erros;
+    document.getElementById('btn-proxima').style.display = "block";
+
+    if(indiceAtual >= filaAleatoria.length){
+        document.getElementById('btn-proxima').textContent = "Ver Resultado Final 🏆";
+    }
+}
+
+function mostrarResultadoFinal(){
+    const fim = Date.now();
+    const segundos = Math.round((fim - inicioTempo) / 1000);
+    const min = Math.floor(segundos / 60);
+    const seg = segundos % 60;
+    const tempoTexto = min > 0 ? `${min} minuto(s) e ${seg} segundo(s)` : `${seg} segundo(s)`;
+    const porcent = Math.round((acertos / 16) * 100);
+
+    // SÓ UMA CARINHA conforme o aproveitamento
+    let carinha, classe;
+    if(porcent >= 90){
+        carinha = "😃";
+        classe = "excelente";
+    }else if(porcent >= 75){
+        carinha = "🙂";
+        classe = "bom";
+    }else if(porcent >= 50){
+        carinha = "😐";
+        classe = "regular";
+    }else{
+        carinha = "🙁";
+        classe = "estudar";
+    }
+
+    document.getElementById('tela-jogo').style.display = "none";
+    document.getElementById('tela-final').style.display = "block";
+    document.getElementById('tempo-final').textContent = tempoTexto;
+    document.getElementById('acertos-final').textContent = acertos;
+    document.getElementById('erros-final').textContent = erros;
+    document.getElementById('porcentagem').textContent = porcent;
+    
+    const divCarinha = document.getElementById('carinha');
+    divCarinha.textContent = carinha;
+    divCarinha.className = `carinha ${classe}`;
+}
+
+embaralharPerguntas();
+novaRodada();
+</script>
+</body>
+</html>
