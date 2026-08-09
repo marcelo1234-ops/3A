@@ -3,62 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estudo Orientado: Metonímia ou Pleonasmo?</title>
+    <title>Figuras de Linguagem</title>
     <style>
-        *{margin:0; padding:0; font-family: 'Segoe UI', Arial; box-sizing:border-box;}
-        body{background:#eef2f7; color:#2d3748; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;}
-        .caixa{background:#fff; padding:30px; border-radius:16px; width:100%; max-width:520px; box-shadow:0 8px 30px rgba(0,0,0,0.12);}
-        h1{text-align:center; margin-bottom:8px; color:#2b6cb0; font-size:22px;}
-        .subtitulo{text-align:center; color:#718096; font-size:14px; margin-bottom:20px;}
-        .placar{display:flex; justify-content:space-around; margin-bottom:15px; font-size:17px; font-weight:bold; padding:10px; background:#f7fafc; border-radius:10px;}
-        .progresso{text-align:center; margin-bottom:15px; font-size:15px; color:#4a5568;}
-        .frase{background:#edf2f7; padding:25px 20px; border-radius:12px; margin-bottom:25px; text-align:center; font-size:19px; font-weight:500; line-height:1.5; min-height:90px; display:flex; align-items:center; justify-content:center;}
-        .opcoes{display:flex; gap:15px; margin-bottom:20px;}
-        .btn{flex:1; padding:16px; border:none; border-radius:10px; font-size:17px; font-weight:bold; cursor:pointer; transition:0.2s;}
-        .btn-metonimia{background:#ed8936; color:white;}
-        .btn-pleonasmo{background:#38a169; color:white;}
-        .btn:hover{transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-        .btn:disabled{opacity:0.5; cursor:not-allowed; transform:none; box-shadow:none;}
-        .btn-proxima{width:100%; margin-top:8px; padding:14px; background:#2b6cb0; color:white; font-size:16px; border-radius:10px;}
-        .btn-proxima:hover{background:#2c5282;}
-        .resultado{text-align:center; margin:12px 0; font-size:18px; font-weight:bold; min-height:30px;}
-        .explicacao{margin-top:10px; padding:14px; border-radius:10px; display:none; text-align:center; line-height:1.6; font-size:15px;}
-        .correta{background:#f0fff4; border:2px solid #9ae6b4; color:#22543d;}
-        .errada{background:#fff5f5; border:2px solid #feb2b2; color:#742a2a;}
+        *{margin:0; padding:0; font-family: Arial, sans-serif; box-sizing:border-box;}
+
+        body{
+            background:#1a1a2e;
+            color:#e6e6e6;
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+            position:relative;
+            overflow:hidden;
+        }
+
+        /* ==============================================
+           🌠 ESTRELAS CADENTES COM RASTRO NO FUNDO
+           ============================================== */
+        .fundo-estrelas{
+            position:fixed;
+            top:0; left:0;
+            width:100%; height:100%;
+            z-index:0;
+            overflow:hidden;
+            pointer-events:none;
+        }
+        .estrela{
+            position:absolute;
+            width:2px;
+            height:2px;
+            background:#fff;
+            border-radius:50%;
+            opacity:0;
+            filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 8px #87ceeb);
+            animation:cadente linear infinite;
+        }
+        .rastro{
+            position:absolute;
+            height:1px;
+            background:linear-gradient(90deg, rgba(135,206,235,0.7), transparent);
+            pointer-events:none;
+        }
+
+        @keyframes cadente {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            5% { opacity: 1; }
+            100% {
+                transform: translate(calc(var(--dx) * 1px), calc(var(--dy) * 1px));
+                opacity: 0;
+            }
+        }
+
+        .caixa{
+            background:#16213e;
+            padding:30px;
+            border-radius:16px;
+            width:100%;
+            max-width:520px;
+            box-shadow:0 8px 30px rgba(0,0,0,0.5);
+            z-index:1;
+        }
+
+        @keyframes aparecer {
+            from { opacity:0; transform:translateY(30px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        @keyframes aparecerSuave {
+            from { opacity:0; transform:scale(0.95); }
+            to   { opacity:1; transform:scale(1); }
+        }
+        @keyframes pulsar {
+            0%   { box-shadow:0 0 0 rgba(46,213,115,0.4); }
+            50%  { box-shadow:0 0 18px rgba(46,213,115,0.7); }
+            100% { box-shadow:0 0 0 rgba(46,213,115,0.4); }
+        }
+
+        .tela-intro{text-align:center; padding:30px 20px;}
+        .tela-intro h2{
+            color:#ff9f43; font-size:28px; margin-bottom:15px;
+            opacity:0; animation:aparecer 0.6s ease-out forwards;
+        }
+        .tela-intro h3{
+            color:#2ed573; font-size:28px; margin-bottom:35px;
+            opacity:0; animation:aparecer 0.6s ease-out 0.2s forwards;
+        }
+        .btn-iniciar{
+            width:100%; padding:18px;
+            background:linear-gradient(135deg, #2ed573, #1e8449);
+            color:white; border:none; border-radius:12px;
+            font-size:22px; font-weight:bold; cursor:pointer;
+            opacity:0; animation:aparecer 0.6s ease-out 0.4s forwards, pulsar 2s infinite 0.6s;
+        }
+        .btn-iniciar:hover{transform:scale(1.05);}
+
+        .tela-jogo{display:none;}
+        .tela-jogo.ativa{ display:block; animation:aparecerSuave 0.5s ease-out forwards; }
+        h1{
+            text-align:center; margin-bottom:15px; color:#5dade2; font-size:22px;
+            opacity:0; animation:aparecer 0.5s ease-out forwards;
+        }
+        .subtitulo{
+            text-align:center; color:#a0aec0; font-size:14px; margin-bottom:20px;
+            opacity:0; animation:aparecer 0.5s ease-out 0.1s forwards;
+        }
+        .progresso{
+            text-align:center; margin-bottom:15px; font-size:15px; color:#a0aec0;
+            opacity:0; animation:aparecer 0.5s ease-out 0.2s forwards;
+        }
+        .placar{
+            display:flex; justify-content:space-around; margin-bottom:15px;
+            font-size:17px; font-weight:bold; padding:12px;
+            background:rgba(255,255,255,0.05); border-radius:10px;
+            opacity:0; animation:aparecer 0.5s ease-out 0.3s forwards;
+        }
+
+        .frase{
+            background:rgba(255,255,255,0.06); padding:25px 20px; border-radius:12px;
+            margin-bottom:25px; text-align:center; font-size:19px;
+            font-weight:500; line-height:1.5; min-height:100px;
+            display:flex; align-items:center; justify-content:center;
+            opacity:0; transform:translateY(20px);
+            transition:all 0.4s ease-out;
+        }
+        .frase.ativa{ opacity:1; transform:translateY(0); }
+
+        .opcoes{display:flex; gap:15px; margin-bottom:15px;}
+        .btn{
+            flex:1; padding:16px; border:none; border-radius:10px;
+            font-size:17px; font-weight:bold; cursor:pointer;
+            opacity:0; transform:translateY(15px);
+            transition:all 0.4s ease-out;
+        }
+        .opcoes.ativa .btn{ opacity:1; transform:translateY(0); }
+        .btn-metonimia{background:#ff9f43; color:#1a1a2e; animation-delay:0.1s;}
+        .btn-pleonasmo{background:#2ed573; color:#1a1a2e; animation-delay:0.2s;}
+        .btn:disabled{opacity:0.5;}
+        .btn-proxima{
+            width:100%; margin-top:8px; padding:14px;
+            background:#4a69bd; color:white; font-size:16px;
+            border-radius:10px; border:none; cursor:pointer;
+            opacity:0; transform:translateY(10px);
+            transition:all 0.4s ease-out;
+        }
+        .btn-proxima.ativa{ opacity:1; transform:translateY(0); }
+        .resultado{
+            text-align:center; margin:12px 0; font-size:18px; font-weight:bold; min-height:30px;
+            opacity:0; transition:opacity 0.3s ease-out;
+        }
+        .resultado.ativa{ opacity:1; }
+        .explicacao{
+            margin-top:12px; padding:15px; border-radius:10px;
+            opacity:0; transform:translateY(10px);
+            transition:all 0.4s ease-out;
+            text-align:center; line-height:1.6; font-size:15px;
+        }
+        .explicacao.ativa{ opacity:1; transform:translateY(0); display:block; }
+        .correta{background:rgba(46,213,115,0.15); border:2px solid #2ed573; color:#2ed573;}
+        .errada{background:rgba(255,107,107,0.15); border:2px solid #ff6b6b; color:#ff6b6b;}
+
         .tela-final{display:none; text-align:center; padding:20px;}
-        .tela-final h2{color:#2b6cb0; margin-bottom:15px; font-size:24px;}
-        .tela-final .item{font-size:18px; margin:10px 0; padding:12px; background:#f7fafc; border-radius:8px;}
-        .carinha{margin-top:20px; font-size:60px; padding:15px; border-radius:12px;}
-        .excelente{background:#f0fff4; border:2px solid #9ae6b4;}
-        .bom{background:#fef5e7; border:2px solid #fbd38d;}
-        .regular{background:#fef3e2; border:2px solid #fcb68f;}
-        .estudar{background:#fff5f5; border:2px solid #feb2b2;}
-        .rodape{text-align:center; margin-top:20px; font-size:13px; color:#a0aec0; line-height:1.5;}
+        .tela-final.ativa{ display:block; animation:aparecerSuave 0.6s ease-out forwards; }
+        .tela-final h2{
+            color:#5dade2; margin-bottom:20px; font-size:24px;
+            opacity:0; animation:aparecer 0.5s ease-out forwards;
+        }
+        .tela-final .item{
+            font-size:18px; margin:10px 0; padding:12px;
+            background:rgba(255,255,255,0.05); border-radius:8px;
+            opacity:0; transform:translateY(10px);
+            animation:aparecer 0.5s ease-out forwards;
+        }
+        .tela-final .item:nth-child(2){animation-delay:0.1s;}
+        .tela-final .item:nth-child(3){animation-delay:0.2s;}
+        .tela-final .item:nth-child(4){animation-delay:0.3s;}
+        .carinha{
+            margin-top:20px; font-size:65px; padding:15px; border-radius:12px;
+            opacity:0; transform:scale(0.5);
+            animation:aparecerSuave 0.6s ease-out 0.4s forwards;
+        }
+        .excelente{background:rgba(46,213,115,0.15); border:2px solid #2ed573;}
+        .bom{background:rgba(255,159,67,0.15); border:2px solid #ff9f43;}
+        .regular{background:rgba(255,221,67,0.15); border:2px solid #ffdd43;}
+        .estudar{background:rgba(255,107,107,0.15); border:2px solid #ff6b6b;}
+
+        .btn-musica{
+            position:fixed; top:15px; right:15px;
+            background:#16213e; color:#fff;
+            padding:8px 12px; border-radius:8px;
+            border:none; cursor:pointer; font-size:14px;
+            opacity:0; animation:aparecer 0.5s ease-out 0.5s forwards;
+        }
     </style>
 </head>
 <body>
-    <div class="caixa" id="tela-jogo">
-        <h1>Figuras de Linguagem</h1>
-        <p class="subtitulo">Identifique: Metonímia ou Pleonasmo</p>
-        
-        <div class="progresso">Questão <span id="atual">1</span> de <span id="total">16</span></div>
-        
-        <div class="placar">
+
+    <!-- 🌠 CAMADA DAS ESTRELAS CADENTES -->
+    <div class="fundo-estrelas" id="fundoEstrelas"></div>
+
+    <button class="btn-musica" id="btnMusica" onclick="alternarMusica()">🔇 Música</button>
+
+    <div class="caixa tela-intro">
+        <h2>📌 Metonímia</h2>
+        <h3>📌 Pleonasmo</h3>
+        <button class="btn-iniciar" onclick="iniciarJogo()">🚀 Iniciar</button>
+    </div>
+
+    <div class="caixa tela-jogo" id="tela-jogo">
+        <h1 style="animation-delay:0s;">Figuras de Linguagem</h1>
+        <p class="subtitulo" style="animation-delay:0.1s;">Identifique: Metonímia ou Pleonasmo</p>
+        <div class="progresso" style="animation-delay:0.2s;">Questão <span id="atual">1</span> de <span id="total">16</span></div>
+        <div class="placar" style="animation-delay:0.3s;">
             <span>✅ Acertos: <span id="acertos">0</span></span>
             <span>❌ Erros: <span id="erros">0</span></span>
         </div>
-
         <div class="frase" id="frase"></div>
-        
-        <div class="opcoes">
+        <div class="opcoes" id="opcoes">
             <button class="btn btn-metonimia" id="btn-met" onclick="responder('metonimia')">METONÍMIA</button>
             <button class="btn btn-pleonasmo" id="btn-pleo" onclick="responder('pleonasmo')">PLEONASMO</button>
         </div>
-        
         <div class="resultado" id="resultado"></div>
         <div class="explicacao" id="explicacao"></div>
-        
-        <button class="btn btn-proxima" id="btn-proxima" onclick="novaRodada()" style="display:none;">Próxima Questão →</button>
+        <button class="btn btn-proxima" id="btn-proxima" onclick="novaRodada()">Próxima Questão →</button>
     </div>
 
     <div class="caixa tela-final" id="tela-final">
@@ -66,38 +237,122 @@
         <div class="item">⏱️ Tempo total: <span id="tempo-final"></span></div>
         <div class="item">✅ Acertos: <span id="acertos-final"></span> / 16</div>
         <div class="item">❌ Erros: <span id="erros-final"></span> / 16</div>
-        <div class="item">📈 Aproveitamento: <span id="porcentagem"></span>%</div>
+        <div class="item">📊 Desempenho: <span id="porcentagem"></span>%</div>
         <div class="carinha" id="carinha"></div>
     </div>
+
+    <audio id="musica" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" type="audio/mpeg">
     
-    <p class="rodape">Estudo Orientado — Escola Lili Feitosa<br>3º Ano A</p>
 
 <script>
 const perguntas = [
-    // METONÍMIA
-    {texto: "Bebeu uma taça de vinho.", resposta: "metonimia", explicação: "📌 Metonímia: usa o recipiente (taça) para representar o conteúdo (vinho)."},
-    {texto: "Leio Machado de Assis todos os dias.", resposta: "metonimia", explicação: "📌 Metonímia: usa o nome do autor para representar suas obras."},
-    {texto: "O salário mal dá para comer.", resposta: "metonimia", explicação: "📌 Metonímia: usa o alimento para representar o sustento."},
-    {texto: "Gosto de ler os clássicos da literatura.", resposta: "metonimia", explicação: "📌 Metonímia: usa uma característica para representar as obras."},
-    {texto: "A cidade inteira foi às ruas.", resposta: "metonimia", explicação: "📌 Metonímia: usa o lugar para representar as pessoas que nele vivem."},
-    {texto: "Ele é um bom coração.", resposta: "metonimia", explicação: "📌 Metonímia: usa uma parte do corpo para representar o sentimento/a pessoa."},
-    {texto: "Comprei um novo quadro de Picasso.", resposta: "metonimia", explicação: "📌 Metonímia: usa o nome do artista para representar sua obra."},
-    {texto: "O estádio aplaudiu de pé.", resposta: "metonimia", explicação: "📌 Metonímia: usa o local para representar o público presente."},
-    // PLEONASMO
-    {texto: "Subiu para cima do telhado.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: 'Subir' já significa ir para cima — repetição desnecessária."},
-    {texto: "Entrou para dentro de casa.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: 'Entrar' já significa ir para dentro — ideia repetida."},
-    {texto: "O sol lá fora está muito quente.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: o sol já está fora por natureza — redundância."},
-    {texto: "Olhar os olhos dela bem de perto.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: repetição da ideia de ver/observar."},
-    {texto: "Vi com meus próprios olhos.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: ver é sempre com os olhos — redundância."},
-    {texto: "A chuva caiu do céu.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: chuva já cai do céu — informação óbvia."},
-    {texto: "Andei a pé pela cidade.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: andar geralmente é a pé — redundância."},
-    {texto: "Encontramo-nos juntos na escola.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: 'Encontrar-se' já implica estar junto."}
+    {texto: "Bebeu uma taça de vinho.", resposta: "metonimia", explicação: "📌 Metonímia: usa o RECIPIENTE (taça) para representar o CONTEÚDO (vinho). Não se bebe a taça, bebe-se o vinho que está dentro dela."},
+    {texto: "Leio Machado de Assis todos os dias.", resposta: "metonimia", explicação: "📌 Metonímia: usa o NOME DO AUTOR para representar suas OBRAS. Você não lê a pessoa, lê o que ela escreveu."},
+    {texto: "O salário mal dá para comer.", resposta: "metonimia", explicação: "📌 Metonímia: usa ALIMENTO (comer) para representar o SUSTENTO em geral. O salário paga moradia, conta, etc., não só comida."},
+    {texto: "Gosto de ler os clássicos da literatura.", resposta: "metonimia", explicação: "📌 Metonímia: usa uma CARACTERÍSTICA (clássico) para representar as OBRAS que têm essa característica."},
+    {texto: "A cidade inteira foi às ruas.", resposta: "metonimia", explicação: "📌 Metonímia: usa o LUGAR (cidade) para representar as PESSOAS que moram nele. A cidade não tem pernas para andar!"},
+    {texto: "Ele é um bom coração.", resposta: "metonimia", explicação: "📌 Metonímia: usa uma PARTE DO CORPO (coração) para representar o SENTIMENTO e a bondade da pessoa."},
+    {texto: "Comprei um novo quadro de Picasso.", resposta: "metonimia", explicação: "📌 Metonímia: usa o NOME DO ARTISTA para representar a OBRA feita por ele. Você não compra o artista, compra a pintura."},
+    {texto: "O estádio aplaudiu de pé.", resposta: "metonimia", explicação: "📌 Metonímia: usa o LOCAL (estádio) para representar o PÚBLICO que está dentro. O estádio em si não aplaude!"},
+    {texto: "Subiu para cima do telhado.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! 'Subir' JÁ significa ir para cima. Dizer 'subir para cima' é repetir a mesma ideia duas vezes."},
+    {texto: "Entrou para dentro de casa.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! 'Entrar' JÁ significa ir para dentro. 'Entrar para dentro' é dizer a mesma coisa de novo."},
+    {texto: "O sol lá fora está muito quente.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! O sol está no céu, ou seja, FORA. Dizer 'sol lá fora' é desnecessário."},
+    {texto: "Olhar os olhos dela bem de perto.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! Olhar é feito com os olhos. 'Olhar os olhos' repete a ideia de ver."},
+    {texto: "Vi com meus próprios olhos.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! Ver só pode ser com os olhos. Não precisa dizer 'com os olhos'."},
+    {texto: "A chuva caiu do céu.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! A chuva SEMPRE cai do céu/nuvens. É informação óbvia e repetida."},
+    {texto: "Andei a pé pela cidade.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! Andar = ir a pé. Se fosse de carro, seria 'dirigir', não 'andar'."},
+    {texto: "Encontramo-nos juntos na escola.", resposta: "pleonasmo", explicação: "📌 Pleonasmo: REDUNDÂNCIA! 'Encontrar-se' JÁ significa estar junto com alguém. Não precisa do 'juntos'."}
 ];
 
-let acertos = 0, erros = 0, perguntaAtual;
-let filaAleatoria = [];
-let indiceAtual = 0;
-let inicioTempo = Date.now();
+let acertos = 0, erros = 0, perguntaAtual, filaAleatoria = [], indiceAtual = 0, inicioTempo, musicaTocando = false;
+const musica = document.getElementById('musica'), btnMusica = document.getElementById('btnMusica');
+const fundoEstrelas = document.getElementById('fundoEstrelas');
+
+// 🌠 GERADOR DE ESTRELAS CADENTES COM RASTRO
+function criarEstrela(){
+    const estrela = document.createElement('div');
+    estrela.classList.add('estrela');
+
+    const largura = window.innerWidth;
+    const altura = window.innerHeight;
+
+    // Posição inicial aleatória (lado direito e topo)
+    const posX = Math.random() * largura;
+    const posY = Math.random() * altura * 0.6;
+
+    // Direção: sempre descendo e levemente à esquerda
+    const angulo = 35 + Math.random() * 20; // graus
+    const dist = 150 + Math.random() * 250; // distância percorrida
+
+    const dx = -dist * Math.cos(angulo * Math.PI / 180);
+    const dy = dist * Math.sin(angulo * Math.PI / 180);
+
+    const duracao = 0.6 + Math.random() * 1.2;
+    const atraso = Math.random() * 2;
+
+    estrela.style.left = posX + 'px';
+    estrela.style.top = posY + 'px';
+    estrela.style.setProperty('--dx', dx);
+    estrela.style.setProperty('--dy', dy);
+    estrela.style.animationDuration = duracao + 's';
+    estrela.style.animationDelay = atraso + 's';
+
+    // Tamanho e brilho aleatórios
+    const tamanho = 1 + Math.random() * 2;
+    estrela.style.width = tamanho + 'px';
+    estrela.style.height = tamanho + 'px';
+
+    // Cor variante branca/azulada
+    const cores = ['#fff', '#f0f8ff', '#87ceeb', '#b0e0e6'];
+    const cor = cores[Math.floor(Math.random() * cores.length)];
+    estrela.style.background = cor;
+    estrela.style.filter = `drop-shadow(0 0 3px ${cor}) drop-shadow(0 0 6px ${cor})`;
+
+    // Rastro
+    const rastro = document.createElement('div');
+    rastro.classList.add('rastro');
+    const comprimento = 20 + Math.random() * 60;
+    rastro.style.width = comprimento + 'px';
+    rastro.style.left = posX + 'px';
+    rastro.style.top = posY + 'px';
+    rastro.style.transform = `rotate(${-angulo}deg)`;
+    rastro.style.transformOrigin = 'right center';
+    rastro.style.opacity = '0';
+    rastro.style.transition = `opacity ${duracao}s ease ${atraso}s`;
+    rastro.style.background = `linear-gradient(270deg, ${cor}cc, transparent)`;
+
+    fundoEstrelas.appendChild(rastro);
+    fundoEstrelas.appendChild(estrela);
+
+    // Faz o rastro aparecer junto com a estrela
+    setTimeout(() => { rastro.style.opacity = '1'; }, atraso * 1000);
+
+    // Limpa depois de passar
+    setTimeout(() => {
+        estrela.remove();
+        rastro.remove();
+    }, (duracao + atraso + 0.5) * 1000);
+}
+
+// Mantém gerando estrelas continuamente
+setInterval(criarEstrela, 350);
+// Estrelas iniciais
+for(let i = 0; i < 8; i++) criarEstrela();
+
+function alternarMusica(){
+    if(musicaTocando){ musica.pause(); btnMusica.textContent = '🔇 Música'; }
+    else{ musica.volume = 0.18; musica.play().catch(() => {}); btnMusica.textContent = '🔊 Música'; }
+    musicaTocando = !musicaTocando;
+}
+
+function iniciarJogo(){
+    document.querySelector('.tela-intro').style.display = 'none';
+    const telaJogo = document.getElementById('tela-jogo');
+    telaJogo.style.display = 'block'; telaJogo.classList.add('ativa');
+    inicioTempo = Date.now();
+    embaralharPerguntas(); novaRodada();
+}
 
 function embaralharPerguntas(){
     filaAleatoria = [...perguntas];
@@ -109,89 +364,70 @@ function embaralharPerguntas(){
 }
 
 function novaRodada(){
-    document.getElementById('resultado').textContent = "";
-    document.getElementById('explicacao').style.display = "none";
-    document.getElementById('btn-proxima').style.display = "none";
+    document.getElementById('resultado').classList.remove('ativa');
+    document.getElementById('explicacao').classList.remove('ativa');
+    document.getElementById('btn-proxima').classList.remove('ativa');
+    document.getElementById('btn-proxima').style.display = 'none';
     document.getElementById('btn-met').disabled = false;
     document.getElementById('btn-pleo').disabled = false;
+    document.getElementById('opcoes').classList.remove('ativa');
 
-    if(indiceAtual >= filaAleatoria.length){
-        mostrarResultadoFinal();
-        return;
-    }
+    if(indiceAtual >= filaAleatoria.length){ mostrarResultadoFinal(); return; }
 
     perguntaAtual = filaAleatoria[indiceAtual];
     indiceAtual++;
     document.getElementById('atual').textContent = indiceAtual;
-    document.getElementById('frase').textContent = perguntaAtual.texto;
+
+    const frase = document.getElementById('frase');
+    frase.classList.remove('ativa');
+    setTimeout(() => {
+        frase.textContent = perguntaAtual.texto;
+        frase.classList.add('ativa');
+        document.getElementById('opcoes').classList.add('ativa');
+    }, 100);
 }
 
 function responder(respostaEscolhida){
     document.getElementById('btn-met').disabled = true;
     document.getElementById('btn-pleo').disabled = true;
+    const res = document.getElementById('resultado'), exp = document.getElementById('explicacao'), btnProx = document.getElementById('btn-proxima');
 
-    const res = document.getElementById('resultado');
-    const exp = document.getElementById('explicacao');
-    
     if(respostaEscolhida === perguntaAtual.resposta){
-        acertos++;
-        res.textContent = "✅ RESPOSTA CORRETA!";
-        exp.className = "explicacao correta";
+        acertos++; res.textContent = "✅ RESPOSTA CORRETA!"; exp.className = "explicacao correta";
     }else{
-        erros++;
-        res.textContent = "❌ RESPOSTA ERRADA! Veja abaixo:";
-        exp.className = "explicacao errada";
+        erros++; res.textContent = "❌ RESPOSTA ERRADA!"; exp.className = "explicacao errada";
     }
 
     exp.textContent = perguntaAtual.explicação;
-    exp.style.display = "block";
+    res.classList.add('ativa');
+    setTimeout(() => { exp.classList.add('ativa'); }, 150);
+    setTimeout(() => { btnProx.style.display = 'block'; btnProx.classList.add('ativa'); }, 300);
+
     document.getElementById('acertos').textContent = acertos;
     document.getElementById('erros').textContent = erros;
-    document.getElementById('btn-proxima').style.display = "block";
 
-    if(indiceAtual >= filaAleatoria.length){
-        document.getElementById('btn-proxima').textContent = "Ver Resultado Final 🏆";
-    }
+    if(indiceAtual >= filaAleatoria.length) btnProx.textContent = "Ver Resultado Final 🏆";
 }
 
 function mostrarResultadoFinal(){
-    const fim = Date.now();
-    const segundos = Math.round((fim - inicioTempo) / 1000);
-    const min = Math.floor(segundos / 60);
-    const seg = segundos % 60;
-    const tempoTexto = min > 0 ? `${min} minuto(s) e ${seg} segundo(s)` : `${seg} segundo(s)`;
-    const porcent = Math.round((acertos / 16) * 100);
+    document.getElementById('tela-jogo').style.display = 'none';
+    const telaFinal = document.getElementById('tela-final');
+    telaFinal.style.display = 'block'; telaFinal.classList.add('ativa');
 
-    // SÓ UMA CARINHA conforme o aproveitamento
-    let carinha, classe;
-    if(porcent >= 90){
-        carinha = "😃";
-        classe = "excelente";
-    }else if(porcent >= 75){
-        carinha = "🙂";
-        classe = "bom";
-    }else if(porcent >= 50){
-        carinha = "😐";
-        classe = "regular";
-    }else{
-        carinha = "🙁";
-        classe = "estudar";
-    }
-
-    document.getElementById('tela-jogo').style.display = "none";
-    document.getElementById('tela-final').style.display = "block";
-    document.getElementById('tempo-final').textContent = tempoTexto;
+    const segundos = Math.round((Date.now() - inicioTempo) / 1000);
+    const min = Math.floor(segundos / 60), seg = segundos % 60;
+    document.getElementById('tempo-final').textContent = min > 0 ? `${min}m ${seg}s` : `${seg}s`;
     document.getElementById('acertos-final').textContent = acertos;
     document.getElementById('erros-final').textContent = erros;
+    const porcent = Math.round((acertos / 16) * 100);
     document.getElementById('porcentagem').textContent = porcent;
-    
-    const divCarinha = document.getElementById('carinha');
-    divCarinha.textContent = carinha;
-    divCarinha.className = `carinha ${classe}`;
-}
 
-embaralharPerguntas();
-novaRodada();
+    const carinha = document.getElementById('carinha');
+    if(porcent >= 90){ carinha.textContent = '😃'; carinha.className = 'carinha excelente'; }
+    else if(porcent >= 75){ carinha.textContent = '🙂'; carinha.className = 'carinha bom'; }
+    else if(porcent >= 50){ carinha.textContent = '😐'; carinha.className = 'carinha regular'; }
+    else{ carinha.textContent = '🙁'; carinha.className = 'carinha estudar'; }
+}
 </script>
 </body>
 </html>
