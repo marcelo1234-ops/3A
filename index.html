@@ -307,4 +307,247 @@ function fim(){
 }
 </script>
 </body>
+</html>.btn {
+    flex:1; padding:15px; border:none; border-radius:10px;
+    font-size:17px; font-weight:bold; cursor:pointer;
+}
+.btn:disabled { opacity:0.5; }
+.btn-metonimia { background:#ff9f43; color:#000; }
+.btn-pleonasmo { background:#2ed573; color:#000; }
+.btn-proxima {
+    display:none; width:100%; padding:12px; margin-top:10px;
+    background:#4a69bd; color:#fff; border:none;
+    border-radius:10px; font-size:16px; cursor:pointer;
+}
+.resultado { text-align:center; font-size:18px; font-weight:bold; margin:10px 0; min-height:30px; }
+.explicacao {
+    display:none; padding:15px; border-radius:10px;
+    text-align:center; line-height:1.5; margin-top:10px;
+}
+.correta { background:rgba(46,213,115,0.15); color:#2ed573; }
+.errada { background:rgba(255,107,107,0.15); color:#ff6b6b; }
+
+.item { text-align:center; margin:10px 0; font-size:18px; }
+.carinha { text-align:center; font-size:50px; margin-top:20px; }
+.btn-musica {
+    position:fixed; top:10px; right:10px;
+    padding:8px 12px; background:#16213e;
+    color:#fff; border:none; border-radius:8px;
+    cursor:pointer;
+}
+
+/* ==============================================
+   🚫 BOTÃO DISCRETO NO CANTO INFERIOR ESQUERDO
+   ============================================== */
+.btn-escondido {
+    position:fixed;
+    bottom:15px;
+    left:15px;
+    padding:6px 10px;
+    background:rgba(100, 100, 120, 0.15);
+    color:rgba(150, 150, 170, 0.4);
+    border:none;
+    border-radius:6px;
+    font-size:11px;
+    cursor:pointer;
+    text-decoration:none;
+    transition:all 0.3s ease;
+    z-index:5;
+}
+.btn-escondido:hover {
+    color:rgba(255, 255, 255, 0.8);
+    background:rgba(100, 100, 120, 0.3);
+}
+</style>
+</head>
+<body>
+
+<button class="btn-musica" id="btnMusica" onclick="alternarMusica()">🔇 Música</button>
+
+<div class="personagem" id="personagem">
+    <img src="https://wiki.leagueoflegends.com/en-us/images/Canonically%E2%80%A6_Emote.png?729aa" id="imgN" alt="Normal">
+    <img src="https://wiki.leagueoflegends.com/en-us/images/Braumbread_Emote.png?bdaa2" id="imgS" alt="Sucesso">
+    <img src="https://wiki.leagueoflegends.com/en-us/images/Dravenbread_Emote.png?3b51c" id="imgE" alt="Erro">
+</div>
+
+<div class="caixa tela-intro">
+    <h2>📌 Metonímia</h2>
+    <h3>📌 Pleonasmo</h3>
+    <button class="btn-iniciar" onclick="iniciar()">🚀 Iniciar</button>
+</div>
+
+<div class="caixa tela-jogo" id="telaJogo">
+    <h1>Figuras de Linguagem</h1>
+    <p class="subtitulo">Identifique a alternativa correta</p>
+    <p class="progresso">Questão <span id="numQ">1</span> de 16</p>
+    <div class="placar">
+        <span>✅ Acertos: <span id="acertos">0</span></span>
+        <span>❌ Erros: <span id="erros">0</span></span>
+    </div>
+    <div class="frase" id="frase"></div>
+    <div class="opcoes">
+        <button class="btn btn-metonimia" id="btnM" onclick="resp('metonimia')">METONÍMIA</button>
+        <button class="btn btn-pleonasmo" id="btnP" onclick="resp('pleonasmo')">PLEONASMO</button>
+    </div>
+    <div class="resultado" id="res"></div>
+    <div class="explicacao" id="exp"></div>
+    <button class="btn-proxima" id="btnProx" onclick="proxima()">Próxima Questão →</button>
+</div>
+
+<div class="caixa tela-final" id="telaFinal">
+    <h2>🏆 Resultado Final</h2>
+    <p class="item">⏱️ Tempo: <span id="tempo"></span></p>
+    <p class="item">✅ Acertos: <span id="acF"></span> / 16</p>
+    <p class="item">❌ Erros: <span id="erF"></span> / 16</p>
+    <p class="item">📊 Desempenho: <span id="porc"></span>%</p>
+    <p class="carinha" id="carinha"></p>
+</div>
+
+<!-- 🚫 BOTÃO DISCRETO NO CANTO INFERIOR -->
+<a href="https://youtu.be/dQw4w9WgXcQ?si=To6K1dKg3BcfuNYn" target="_blank" class="btn-escondido">
+    não apertar
+</a>
+
+<audio id="musica" loop preload="auto">
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" type="audio/mpeg">
+
+
+<script>
+const perguntas = [
+    {t:"Bebeu uma taça de vinho.", r:"metonimia", e:"Metonímia: recipiente pelo conteúdo."},
+    {t:"Leio Machado de Assis todos os dias.", r:"metonimia", e:"Metonímia: autor pela obra."},
+    {t:"O salário mal dá para comer.", r:"metonimia", e:"Metonímia: alimento pelo sustento."},
+    {t:"Gosto de ler os clássicos da literatura.", r:"metonimia", e:"Metonímia: característica pelo todo."},
+    {t:"A cidade inteira foi às ruas.", r:"metonimia", e:"Metonímia: lugar pelas pessoas."},
+    {t:"Ele é um bom coração.", r:"metonimia", e:"Metonímia: parte pelo todo."},
+    {t:"Comprei um quadro de Picasso.", r:"metonimia", e:"Metonímia: autor pela obra."},
+    {t:"O estádio aplaudiu de pé.", r:"metonimia", e:"Metonímia: lugar pelas pessoas."},
+    {t:"Subiu para cima do telhado.", r:"pleonasmo", e:"Pleonasmo: 'subir' já é ir para cima."},
+    {t:"Entrou para dentro de casa.", r:"pleonasmo", e:"Pleonasmo: 'entrar' já é ir para dentro."},
+    {t:"O sol lá fora está quente.", r:"pleonasmo", e:"Pleonasmo: sol já está fora."},
+    {t:"Olhar os olhos dela de perto.", r:"pleonasmo", e:"Pleonasmo: olhar é com os olhos."},
+    {t:"Vi com meus próprios olhos.", r:"pleonasmo", e:"Pleonasmo: ver é com os olhos."},
+    {t:"A chuva caiu do céu.", r:"pleonasmo", e:"Pleonasmo: chuva já vem do céu."},
+    {t:"Andei a pé pela cidade.", r:"pleonasmo", e:"Pleonasmo: andar = ir a pé."},
+    {t:"Encontramo-nos juntos na escola.", r:"pleonasmo", e:"Pleonasmo: encontrar-se já é junto."}
+];
+
+let acertos=0, erros=0, indice=0, lista=[], inicio=0, tocando=false;
+const imgN=document.getElementById('imgN');
+const imgS=document.getElementById('imgS');
+const imgE=document.getElementById('imgE');
+
+function mostraNeutro(){
+    imgN.style.opacity='1';
+    imgN.style.transform='scale(1)';
+    imgS.style.opacity='0';
+    imgE.style.opacity='0';
+}
+
+function animarResp(certo){
+    imgN.style.opacity='0';
+    const alvo = certo ? imgS : imgE;
+    alvo.style.opacity='1';
+}
+
+function animarTroca(){
+    [imgS,imgE].forEach(i=>{
+        i.style.opacity='0';
+        i.style.transform='translateX(50px)';
+    });
+    imgN.style.opacity='0';
+    imgN.style.transform='translateX(-50px)';
+    setTimeout(()=>{
+        imgN.style.transform='translateX(0)';
+        imgN.style.opacity='1';
+    },200);
+}
+
+function alternarMusica(){
+    const m=document.getElementById('musica');
+    const b=document.getElementById('btnMusica');
+    if(tocando){ m.pause(); b.textContent='🔇 Música'; }
+    else{ m.volume=0.18; m.play().catch(()=>{}); b.textContent='🔊 Música'; }
+    tocando=!tocando;
+}
+
+function iniciar(){
+    document.querySelector('.tela-intro').style.display='none';
+    document.getElementById('telaJogo').style.display='block';
+    inicio=Date.now();
+    lista=[...perguntas].sort(()=>Math.random()-0.5);
+    indice=0; acertos=0; erros=0;
+    mostraNeutro();
+    carregaPergunta();
+}
+
+function carregaPergunta(){
+    if(indice>0) animarTroca();
+    else mostraNeutro();
+
+    document.getElementById('res').textContent='';
+    document.getElementById('exp').style.display='none';
+    document.getElementById('btnProx').style.display='none';
+    document.getElementById('btnM').disabled=false;
+    document.getElementById('btnP').disabled=false;
+
+    if(indice>=lista.length){ fim(); return; }
+
+    const p=lista[indice];
+    document.getElementById('numQ').textContent=indice+1;
+    document.getElementById('frase').textContent=p.t;
+    document.getElementById('acertos').textContent=acertos;
+    document.getElementById('erros').textContent=erros;
+}
+
+function resp(tipo){
+    document.getElementById('btnM').disabled=true;
+    document.getElementById('btnP').disabled=true;
+    const p=lista[indice];
+    const certo = tipo===p.r;
+
+    if(certo){
+        acertos++;
+        document.getElementById('res').textContent='✅ RESPOSTA CORRETA!';
+        document.getElementById('exp').className='explicacao correta';
+    }else{
+        erros++;
+        document.getElementById('res').textContent='❌ RESPOSTA ERRADA!';
+        document.getElementById('exp').className='explicacao errada';
+    }
+
+    animarResp(certo);
+
+    document.getElementById('exp').textContent=p.e;
+    document.getElementById('exp').style.display='block';
+    document.getElementById('btnProx').style.display='block';
+    document.getElementById('acertos').textContent=acertos;
+    document.getElementById('erros').textContent=erros;
+    document.getElementById('btnProx').textContent = indice>=15 ? 'Ver Resultado Final 🏆' : 'Próxima Questão →';
+}
+
+function proxima(){
+    indice++;
+    carregaPergunta();
+}
+
+function fim(){
+    document.getElementById('telaJogo').style.display='none';
+    document.getElementById('telaFinal').style.display='block';
+    const seg=Math.round((Date.now()-inicio)/1000);
+    const m=Math.floor(seg/60), s=seg%60;
+    document.getElementById('tempo').textContent = m>0 ? `${m}m ${s}s` : `${s}s`;
+    document.getElementById('acF').textContent=acertos;
+    document.getElementById('erF').textContent=erros;
+    const porc=Math.round((acertos/16)*100);
+    document.getElementById('porc').textContent=porc;
+
+    const c=document.getElementById('carinha');
+    if(porc>=90) c.textContent='😃';
+    else if(porc>=75) c.textContent='🙂';
+    else if(porc>=50) c.textContent='😐';
+    else c.textContent='🙁';
+}
+</script>
+</body>
 </html>
